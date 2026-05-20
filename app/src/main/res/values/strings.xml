@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">分辨率适配</string>
+    <string name="subtitle">调整系统分辨率以适配 Type-C 镜像输出</string>
+    <string name="current_resolution">当前分辨率</string>
+    <string name="loading">获取中…</string>
+    <string name="preset_label">预设分辨率</string>
+    <string name="custom_label">自定义分辨率</string>
+    <string name="width_hint">宽度</string>
+    <string name="height_hint">高度</string>
+    <string name="apply">应用分辨率</string>
+    <string name="restore">恢复原始分辨率</string>
+    <string name="keep">保留</string>
+    <string name="revert">恢复</string>
+    <string name="confirm_title">分辨率已更改</string>
+    <string name="confirm_message">当前分辨率: %1$d × %2$d\n\n%3$d 秒后自动恢复原始分辨率</string>
+    <string name="applied_hint">分辨率已应用，等待确认…</string>
+    <string name="restored_hint">已恢复原始分辨率</string>
+    <string name="error_title">操作失败</string>
+    <string name="error_no_permission">无足够权限执行分辨率调整</string>
+    <string name="error_invalid">请输入有效的宽度和高度</string>
+    <string name="error_shizuku">Shizuku 命令执行失败，请检查 Shizuku 服务是否正常</string>
+    <string name="shizuku_title">需要 Shizuku 权限</string>
+    <string name="shizuku_message">此应用需要通过 Shizuku 获取系统权限来调整分辨率。</string>
+    <string name="shizuku_step1">1. 安装 Shizuku 应用</string>
+    <string name="shizuku_step2">2. 开启无线调试并连接</string>
+    <string name="shizuku_step3">3. 在 Shizuku 中启动服务</string>
+    <string name="shizuku_step4">4. 返回此应用授权</string>
+    <string name="shizuku_cmd_hint">adb shell sh /data/data/moe.shizuku.privileged.api/start.sh</string>
+    <string name="download_shizuku">下载 Shizuku</string>
+    <string name="ready">我已准备好</string>
+    <string name="apply_again">重新尝试</string>
+    <string name="adb_guide_title">通过 ADB 手动设置</string>
+    <string name="adb_guide_message">所有自动方式均不可用。你可以通过 ADB 手动设置：\n\nadb shell wm size WIDTHxHEIGHT\n\n例如：\nadb shell wm size 1920x1080</string>
+    <string name="got_it">知道了</string>
+    <string name="flip_label">翻转</string>
+    <string name="delete_confirm">删除此分辨率？</string>
+    <string name="delete_title">删除</string>
+    <string name="custom_radio">自定义</string>
+</resources>
