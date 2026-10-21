@@ -53,10 +53,26 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/recentLabel"
             style="@style/SectionLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:text="@string/recent_label"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/recentGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
+
+        <TextView
+            style="@style/SectionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="@string/preset_label" />
 
         <LinearLayout

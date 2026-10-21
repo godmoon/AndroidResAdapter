@@ -47,12 +47,16 @@ public class MainActivity extends AppCompatActivity {
     private String selectedRes;
     private static final String CUSTOM_RES_KEY = "custom_resolutions";
     private static final String HIDDEN_PRESET_KEY = "hidden_presets";
+    private static final String RECENT_RES_KEY = "recent_resolutions";
+    private static final int RECENT_MAX = 5;
     private static final String[] PRESET_RESOLUTIONS = {
             "1280x720", "1920x1080", "2560x1440", "3840x2160"
     };
 
     private TextView currentResolutionText;
     private LinearLayout presetGroup;
+    private LinearLayout recentGroup;
+    private TextView recentLabel;
     private EditText customWidth, customHeight;
     private MaterialCheckBox flipCheckBox;
     private MaterialButton applyBtn, restoreBtn;
@@ -61,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private List<String> allResolutions = new ArrayList<>();
     private String appliedCustomRes;
+    private String lastAppliedRes;
+    private boolean lastAppliedFlipped;
     private CountDownTimer countdownTimer;
     private AlertDialog countdownDialog;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -102,11 +108,14 @@ public class MainActivity extends AppCompatActivity {
         initShizuku();
         rebuildAllResolutions();
         rebuildRadioGroup();
+        rebuildRecentGroup();
         refreshCurrentResolution();
     }
 
     private void initViews() {
         currentResolutionText = findViewById(R.id.currentResolution);
+        recentGroup = findViewById(R.id.recentGroup);
+        recentLabel = findViewById(R.id.recentLabel);
         presetGroup = findViewById(R.id.presetGroup);
         customWidth = findViewById(R.id.customWidth);
         customHeight = findViewById(R.id.customHeight);
@@ -254,6 +263,76 @@ public class MainActivity extends AppCompatActivity {
         presetGroup.addView(customRow);
     }
 
+    private void rebuildRecentGroup() {
+        List<String> recents = loadRecentResolutions();
+        boolean empty = recents.isEmpty();
+        recentGroup.setVisibility(empty ? View.GONE : View.VISIBLE);
+        recentLabel.setVisibility(empty ? View.GONE : View.VISIBLE);
+
+        recentGroup.removeAllViews();
+
+        for (String entry : recents) {
+            String[] parts = entry.split(":");
+            String res = parts[0];
+            boolean flipped = parts.length > 1 && "1".equals(parts[1]);
+
+            View row = getLayoutInflater().inflate(R.layout.recent_row, recentGroup, false);
+            TextView text = row.findViewById(R.id.resolutionText);
+            View deleteBtn = row.findViewById(R.id.deleteBtn);
+
+            String[] wh = res.split("x");
+            int w = Integer.parseInt(wh[0]);
+            int h = Integer.parseInt(wh[1]);
+
+            if (flipped) {
+                text.setText(h + " × " + w + "（翻转）");
+            } else {
+                text.setText(w + " × " + h);
+            }
+
+            row.setOnClickListener(v -> {
+                lastAppliedRes = res;
+                lastAppliedFlipped = flipped;
+                if (flipped) {
+                    tryApplyResolution(h, w);
+                } else {
+                    tryApplyResolution(w, h);
+                }
+            });
+
+            deleteBtn.setOnClickListener(v -> {
+                List<String> list = loadRecentResolutions();
+                list.remove(entry);
+                saveRecentResolutions(list);
+                rebuildRecentGroup();
+            });
+
+            recentGroup.addView(row);
+        }
+    }
+
+    private List<String> loadRecentResolutions() {
+        String data = prefs.getString(RECENT_RES_KEY, "");
+        if (data.isEmpty()) return new ArrayList<>();
+        return new ArrayList<>(Arrays.asList(data.split(",", -1)));
+    }
+
+    private void saveRecentResolutions(List<String> list) {
+        prefs.edit().putString(RECENT_RES_KEY, TextUtils.join(",", list)).apply();
+    }
+
+    private void addRecentResolution(String res, boolean flipped) {
+        String newEntry = res + ":" + (flipped ? "1" : "0");
+        List<String> recents = loadRecentResolutions();
+        recents.removeIf(e -> e.startsWith(res + ":"));
+        recents.add(0, newEntry);
+        while (recents.size() > RECENT_MAX) {
+            recents.remove(recents.size() - 1);
+        }
+        saveRecentResolutions(recents);
+        rebuildRecentGroup();
+    }
+
     private void deleteResolution(String res) {
         List<String> customs = loadCustomResolutions();
         if (customs.remove(res)) {
@@ -343,6 +422,7 @@ public class MainActivity extends AppCompatActivity {
     private void onApplyClick() {
         hideKeyboard();
         appliedCustomRes = null;
+        lastAppliedFlipped = flipCheckBox.isChecked();
 
         int width, height;
 
@@ -376,6 +456,7 @@ public class MainActivity extends AppCompatActivity {
             if (!isPreset) appliedCustomRes = saveW + "x" + saveH;
         }
 
+        lastAppliedRes = Math.max(width, height) + "x" + Math.min(width, height);
         tryApplyResolution(width, height);
     }
 
@@ -491,6 +572,7 @@ public class MainActivity extends AppCompatActivity {
                     countdownTimer.cancel();
                     if (appliedCustomRes != null && !appliedCustomRes.isEmpty())
                         addCustomResolution(appliedCustomRes);
+                    addRecentResolution(lastAppliedRes, lastAppliedFlipped);
                     showStatus("已保留 " + width + " × " + height, true);
                     setButtonsEnabled(true);
                 })
